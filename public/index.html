@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Upload File</title>
+    <style>
+        progress {
+            width: 100%;
+        }
+
+        #status {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Upload a file</h2>
+    <form id="uploadForm">
+        <input type="file" name="file" required />
+        <input type="password" id="pass" />
+        <button type="submit">Upload</button>
+    </form>
+    <progress id="progressBar" value="0" max="100" style="display:none;"></progress>
+    <div id="status"></div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const pass = document.getElementById('pass');
+        const progressBar = document.getElementById('progressBar');
+        const status = document.getElementById('status');
+
+        form.onsubmit = function (e) {
+            e.preventDefault();
+            const file = form.file.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/upload', true);
+
+            xhr.setRequestHeader('pass', pass.value);
+
+            xhr.upload.onprogress = function (e) {
+                if (e.lengthComputable) {
+                    const percent = (e.loaded / e.total) * 100;
+                    progressBar.style.display = 'block';
+                    progressBar.value = percent;
+                }
+            };
+
+            xhr.onload = function () {
+                status.innerText = xhr.responseText;
+                progressBar.style.display = 'none';
+                form.reset();
+            };
+
+            xhr.onerror = function () {
+                status.innerText = 'Upload failed.';
+                progressBar.style.display = 'none';
+            };
+
+            xhr.send(formData);
+        };
+    </script>
+</body>
+
+</html>
